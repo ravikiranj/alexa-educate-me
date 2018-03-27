@@ -1,4 +1,4 @@
-package com.amazon.asksdk.educateme;
+package com.amazon.asksdk.educateme.skill.speechlet;
 
 import java.util.HashSet;
 import java.util.Set;

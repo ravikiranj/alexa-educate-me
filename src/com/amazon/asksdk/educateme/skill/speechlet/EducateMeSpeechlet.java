@@ -1,8 +1,9 @@
-package com.amazon.asksdk.educateme;
+package com.amazon.asksdk.educateme.skill.speechlet;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.amazon.asksdk.educateme.skill.intent.Intents;
 import com.amazon.speech.slu.Intent;
 import com.amazon.speech.speechlet.IntentRequest;
 import com.amazon.speech.speechlet.LaunchRequest;
@@ -58,6 +59,13 @@ public class EducateMeSpeechlet implements SpeechletV2 {
 
         if (Intents.EDUCATE_INTENT.equals(intentName)) {
             String topic = intent.getSlot(QUERY).getValue();
+
+            // Get Topic Number from DDB
+
+            // Get Pointer Info from DDB
+
+            // Get Data
+
             return getEducateIntentResponse(topic);
         } else if (Intents.AMAZON_HELP_INTENT.equals(intentName)) {
             return getHelpResponse();

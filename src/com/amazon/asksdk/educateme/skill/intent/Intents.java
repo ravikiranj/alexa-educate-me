@@ -1,4 +1,4 @@
-package com.amazon.asksdk.educateme;
+package com.amazon.asksdk.educateme.skill.intent;
 
 public final class Intents {
     public static final String EDUCATE_INTENT = "EducateIntent";
