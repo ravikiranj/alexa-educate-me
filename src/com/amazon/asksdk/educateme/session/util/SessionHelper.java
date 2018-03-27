@@ -10,6 +10,10 @@ public class SessionHelper {
     }
 
     public static void updateReadPointer(String userId, int topicId, int newReadPointer) {
-        //
+        // Update the readPointer to next
+    }
+
+    public static void removeTopic(String userId, int topicId) {
+        // Make call to remove this topic for user.
     }
 }

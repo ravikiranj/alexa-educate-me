@@ -5,6 +5,7 @@ import com.amazon.asksdk.educateme.ddb.model.TopicMessage;
 public class DDBHelper {
 
     public static int getTopicId(String topicName) {
+
         return -1;
     }
 
@@ -14,6 +15,8 @@ public class DDBHelper {
         // Use json mapper to convert into TopicMessage
 
         // return TopicMessage
+
+        // return null if JSON is empty
         return null;
     }
 

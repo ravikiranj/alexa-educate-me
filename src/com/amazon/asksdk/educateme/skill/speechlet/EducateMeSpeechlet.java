@@ -73,6 +73,7 @@ public class EducateMeSpeechlet implements SpeechletV2 {
 
     private SpeechletResponse fetchData(Intent intent, SpeechletRequestEnvelope<IntentRequest> requestEnvelope) {
         User user = requestEnvelope.getSession().getUser();
+        String userId = user.getUserId();
         String topic = intent.getSlot(QUERY).getValue();
         int readPointer = 0;
         TopicMessage topicMessage = null;
@@ -84,11 +85,25 @@ public class EducateMeSpeechlet implements SpeechletV2 {
         if (topicId < 0) {
             return getAskResponse(EDUCATE_ME, UNSUPPORTED_TEXT);
         } else {
-            readPointer = SessionHelper.getReadPointer(user.getUserId(), topicId);
-            topicMessage = DDBHelper.getTopicData(topicId, readPointer);
-            return getEducateIntentResponse(topicMessage.getTextMessage());
-        }
+            readPointer = SessionHelper.getReadPointer(userId, topicId);
 
+            if (readPointer < 0) {
+                topicMessage = DDBHelper.getTopicData(topicId, 0);
+            } else {
+                topicMessage = DDBHelper.getTopicData(topicId, readPointer + 1);
+
+                if (topicMessage == null) {
+                    // If we are done reading the topic - remove the topic from Postgres
+                    SessionHelper.removeTopic(userId, topicId);
+                    return getEducateIntentResponse("It was great educating you on this. Let me know if I can educate you with anything else");
+                }
+
+                // If we have a topicMessage, update the value in SessionManagement to next readPointer
+                SessionHelper.updateReadPointer(userId, topicId, readPointer + 1);
+            }
+
+        }
+        return getEducateIntentResponse(topicMessage.getTextMessage());
     }
 
     @Override
