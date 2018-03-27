@@ -1,0 +1,36 @@
+{
+  "interactionModel": {
+    "languageModel": {
+      "invocationName": "guru",
+      "intents": [
+        {
+          "name": "AMAZON.CancelIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.HelpIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.StopIntent",
+          "samples": []
+        },
+        {
+          "name": "EducateIntent",
+          "slots": [
+            {
+              "name": "QUERY",
+              "type": "AMAZON.SearchQuery"
+            }
+          ],
+          "samples": [
+            "tell me about {QUERY}",
+            "what is {QUERY}",
+            "educate me on {QUERY}"
+          ]
+        }
+      ],
+      "types": []
+    }
+  }
+}

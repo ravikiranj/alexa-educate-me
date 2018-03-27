@@ -1,0 +1,3 @@
+EducateIntent tell me about bitcoin
+EducateIntent what is bitcoin
+EducateIntent educate me on bitcoin
