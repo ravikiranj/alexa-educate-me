@@ -1,6 +1,6 @@
 package com.amazon.asksdk.educateme.ddb.util;
 
-import com.amazon.asksdk.restapi.ddb.model.TopicMessage;
+import com.amazon.asksdk.educateme.ddb.model.TopicMessage;
 
 public class DDBHelper {
 

@@ -3,6 +3,9 @@ package com.amazon.asksdk.educateme.skill.speechlet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.amazon.asksdk.educateme.ddb.model.TopicMessage;
+import com.amazon.asksdk.educateme.ddb.util.DDBHelper;
+import com.amazon.asksdk.educateme.session.util.SessionHelper;
 import com.amazon.asksdk.educateme.skill.intent.Intents;
 import com.amazon.speech.slu.Intent;
 import com.amazon.speech.speechlet.IntentRequest;
@@ -12,6 +15,7 @@ import com.amazon.speech.speechlet.SessionStartedRequest;
 import com.amazon.speech.speechlet.SpeechletV2;
 import com.amazon.speech.speechlet.SpeechletResponse;
 import com.amazon.speech.json.SpeechletRequestEnvelope;
+import com.amazon.speech.speechlet.User;
 import com.amazon.speech.ui.PlainTextOutputSpeech;
 import com.amazon.speech.ui.Reprompt;
 import com.amazon.speech.ui.SimpleCard;
@@ -34,50 +38,63 @@ public class EducateMeSpeechlet implements SpeechletV2 {
     @Override
     public void onSessionStarted(SpeechletRequestEnvelope<SessionStartedRequest> requestEnvelope) {
         log.info("onSessionStarted requestId={}, sessionId={}", requestEnvelope.getRequest().getRequestId(),
-                requestEnvelope.getSession().getSessionId());
+            requestEnvelope.getSession().getSessionId());
         // any initialization logic goes here
     }
 
     @Override
     public SpeechletResponse onLaunch(SpeechletRequestEnvelope<LaunchRequest> requestEnvelope) {
         log.info("onLaunch requestId={}, sessionId={}", requestEnvelope.getRequest().getRequestId(),
-                requestEnvelope.getSession().getSessionId());
+            requestEnvelope.getSession().getSessionId());
         return getWelcomeResponse();
     }
 
     @Override
     public SpeechletResponse onIntent(SpeechletRequestEnvelope<IntentRequest> requestEnvelope) {
         IntentRequest request = requestEnvelope.getRequest();
+        Intent intent = request.getIntent();
 
         log.info("onIntent requestId={}, sessionId={}", request.getRequestId(),
-                requestEnvelope.getSession().getSessionId());
+            requestEnvelope.getSession().getSessionId());
 
-        Intent intent = request.getIntent();
         String intentName = (intent != null) ? intent.getName() : null;
 
         log.info("intentName = {}", intentName);
 
         if (Intents.EDUCATE_INTENT.equals(intentName)) {
-            String topic = intent.getSlot(QUERY).getValue();
-
-            // Get Topic Number from DDB
-
-            // Get Pointer Info from DDB
-
-            // Get Data
-
-            return getEducateIntentResponse(topic);
+            return fetchData(intent, requestEnvelope);
         } else if (Intents.AMAZON_HELP_INTENT.equals(intentName)) {
             return getHelpResponse();
         } else {
             return getAskResponse(EDUCATE_ME, UNSUPPORTED_TEXT);
         }
+
+    }
+
+    private SpeechletResponse fetchData(Intent intent, SpeechletRequestEnvelope<IntentRequest> requestEnvelope) {
+        User user = requestEnvelope.getSession().getUser();
+        String topic = intent.getSlot(QUERY).getValue();
+        int readPointer = 0;
+        TopicMessage topicMessage = null;
+
+        // Get Topic Number from DDB
+        int topicId = DDBHelper.getTopicId(topic);
+
+        // Get Pointer Info from DDB
+        if (topicId < 0) {
+            return getAskResponse(EDUCATE_ME, UNSUPPORTED_TEXT);
+        } else {
+            readPointer = SessionHelper.getReadPointer(user.getUserId(), topicId);
+            topicMessage = DDBHelper.getTopicData(topicId, readPointer);
+            return getEducateIntentResponse(topicMessage.getTextMessage());
+        }
+
     }
 
     @Override
     public void onSessionEnded(SpeechletRequestEnvelope<SessionEndedRequest> requestEnvelope) {
         log.info("onSessionEnded requestId={}, sessionId={}", requestEnvelope.getRequest().getRequestId(),
-                requestEnvelope.getSession().getSessionId());
+            requestEnvelope.getSession().getSessionId());
         // any cleanup logic goes here
     }
 
@@ -119,8 +136,10 @@ public class EducateMeSpeechlet implements SpeechletV2 {
 
     /**
      * Helper method that creates a card object.
+     *
      * @param title title of the card
      * @param content body of the card
+     *
      * @return SimpleCard the display card to be sent along with the voice response.
      */
     private SimpleCard getSimpleCard(String title, String content) {
@@ -133,7 +152,9 @@ public class EducateMeSpeechlet implements SpeechletV2 {
 
     /**
      * Helper method for retrieving an OutputSpeech object when given a string of TTS.
+     *
      * @param speechText the text that should be spoken out to the user.
+     *
      * @return an instance of SpeechOutput.
      */
     private PlainTextOutputSpeech getPlainTextOutputSpeech(String speechText) {
@@ -146,7 +167,9 @@ public class EducateMeSpeechlet implements SpeechletV2 {
     /**
      * Helper method that returns a reprompt object. This is used in Ask responses where you want
      * the user to be able to respond to your speech.
+     *
      * @param outputSpeech The OutputSpeech object that will be said once and repeated if necessary.
+     *
      * @return Reprompt instance.
      */
     private Reprompt getReprompt(OutputSpeech outputSpeech) {
@@ -158,8 +181,10 @@ public class EducateMeSpeechlet implements SpeechletV2 {
 
     /**
      * Helper method for retrieving an Ask response with a simple card and reprompt included.
+     *
      * @param cardTitle Title of the card that you want displayed.
      * @param speechText speech text that will be spoken to the user.
+     *
      * @return the resulting card and speech text.
      */
     private SpeechletResponse getAskResponse(String cardTitle, String speechText) {
