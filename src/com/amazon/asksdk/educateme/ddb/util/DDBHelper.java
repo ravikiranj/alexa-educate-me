@@ -4,12 +4,12 @@ import com.amazon.asksdk.educateme.ddb.model.TopicMessage;
 
 public class DDBHelper {
 
-    public static int getTopicId(String topicName) {
+    public static String getTopicId(String topicName) {
 
-        return -1;
+        return null;
     }
 
-    public static TopicMessage getTopicData(int topicNumber, int readPointer) {
+    public static TopicMessage getTopicData(String topicNumber, int readPointer) {
         // Make call to DynamoDB
 
         // Use json mapper to convert into TopicMessage

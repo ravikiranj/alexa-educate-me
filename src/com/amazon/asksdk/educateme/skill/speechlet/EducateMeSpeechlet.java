@@ -79,10 +79,10 @@ public class EducateMeSpeechlet implements SpeechletV2 {
         TopicMessage topicMessage = null;
 
         // Get Topic Number from DDB
-        int topicId = DDBHelper.getTopicId(topic);
+        String topicId = DDBHelper.getTopicId(topic);
 
         // Get Pointer Info from SessionManagement
-        if (topicId < 0) {
+        if (topicId == null) {
             return getAskResponse(EDUCATE_ME, UNSUPPORTED_TEXT);
         } else {
             readPointer = SessionHelper.getReadPointer(userId, topicId);
@@ -94,7 +94,7 @@ public class EducateMeSpeechlet implements SpeechletV2 {
 
                 if (topicMessage == null) {
                     // If we are done reading the topic - remove the topic from Postgres
-                    SessionHelper.removeTopic(userId, topicId);
+                    SessionHelper.updateReadPointer(userId, topicId, -1);
                     return getEducateIntentResponse("It was great educating you on "+ topic +". Let me know if I can educate you with anything else");
                 }
 
