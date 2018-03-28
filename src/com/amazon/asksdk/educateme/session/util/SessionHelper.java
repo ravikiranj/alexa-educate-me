@@ -7,8 +7,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.ResultSet;
-
-import com.amazon.asksdk.educateme.skill.speechlet.EducateMeSpeechlet;
+import java.sql.Statement;
 
 public class SessionHelper {
 
@@ -17,19 +16,23 @@ public class SessionHelper {
     public static int getReadPointer(String userId, String topicId) {
 
         Connection connection = getConnection();
-        // Make calls to postgres
-        if (connection != null) {
-            String SQL = "SELECT seq_id FROM educate WHERE user_id = ? AND topic_id = ?";
-            int count = 0;
 
+        if (connection != null) {
             PreparedStatement pstmt;
             ResultSet rs = null;
 
+            String SQL = "SELECT seq_id FROM educate_user_topic_state WHERE user_id = ? AND topic_id = ?";
+
             try {
                 pstmt = connection.prepareStatement(SQL);
-                rs = pstmt.executeQuery(SQL);
-                if (rs != null) {
-                    return rs.getInt("seq_id");
+                pstmt.setString(1, userId);
+                pstmt.setString(2, topicId);
+                rs = pstmt.executeQuery();
+
+                while (rs.next()) {
+                    int rdPtr = rs.getInt("seq_id");
+                    log.info(" ReadPointer fetched from db = " + rdPtr);
+                    return rdPtr;
                 }
             } catch (SQLException e) {
                 e.printStackTrace();
@@ -37,7 +40,6 @@ public class SessionHelper {
 
         }
 
-        // Return the readPointer
         return -1;
     }
 
@@ -45,7 +47,7 @@ public class SessionHelper {
         // Update the readPointer to next
         Connection connection = getConnection();
         if (connection != null) {
-            String SQL = "UPDATE educate " + "SET seq_id = ? "
+            String SQL = "UPDATE educate_user_topic_state " + "SET seq_id = ? "
                 + "WHERE user_id = ? AND topic_id = ? ";
 
             int affectedrows = 0;
@@ -63,17 +65,43 @@ public class SessionHelper {
 
             if (affectedrows <= 0) {
                 log.info("No rows updated");
+            } else {
+                log.info("Updated the value of readPointer in db " + newReadPointer);
             }
         }
     }
 
     private static Connection getConnection() {
         try {
+            log.info("Connection Initialized");
             return ConnectionInitializer.connect();
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        log.info("Returning null connection");
         return null;
+    }
+
+    /*
+    Remove this code
+     */
+    public static void insertData(String userId, String topicId, int newReadPointer) {
+        Connection connection = getConnection();
+        if (connection != null) {
+            String sql = "insert into educate_user_topic_state(user_id, topic_id, seq_id) values('" + userId + "', '"
+                + topicId + "'," + newReadPointer + ")";
+            try {
+                Statement statement = connection.createStatement();
+                boolean status = statement.execute(sql);
+                log.info("TRUE ? FALSE ===== " +status);
+            } catch (SQLException e) {
+                log.info("ex "+e);
+                e.printStackTrace();
+            }
+
+            log.info("SQL inserted - " + sql);
+
+        }
     }
 
 }

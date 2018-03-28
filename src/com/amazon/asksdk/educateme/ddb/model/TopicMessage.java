@@ -1,23 +1,61 @@
 package com.amazon.asksdk.educateme.ddb.model;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+
 public class TopicMessage {
 
-    private int messageId;
-    private String textMessage;
+    private String topicId;
+    private String topic;
+    private String id;
+    private String fact;
 
-    public int getMessageId() {
-        return messageId;
+    @JsonCreator
+    public TopicMessage(String topicId, String topic, String id, String fact) {
+        this.topicId = topicId;
+        this.topic = topic;
+        this.id = id;
+        this.fact = fact;
     }
 
-    public void setMessageId(int messageId) {
-        this.messageId = messageId;
+    @Override
+    public String toString() {
+        return "TopicMessage{" +
+            "topicId='" + topicId + '\'' +
+            ", topic='" + topic + '\'' +
+            ", id='" + id + '\'' +
+            ", fact='" + fact + '\'' +
+            '}';
     }
 
-    public String getTextMessage() {
-        return textMessage;
+    public String getTopicId() {
+        return topicId;
     }
 
-    public void setTextMessage(String textMessage) {
-        this.textMessage = textMessage;
+    public void setTopicId(String topicId) {
+        this.topicId = topicId;
+    }
+
+    public String getTopic() {
+        return topic;
+    }
+
+    public void setTopic(String topic) {
+        this.topic = topic;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getFact() {
+        return fact;
+    }
+
+    public void setFact(String fact) {
+        this.fact = fact;
     }
 }

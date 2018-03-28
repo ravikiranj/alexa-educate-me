@@ -46,6 +46,9 @@ dependencies {
 
     // Custom
     compile group: 'com.google.guava', name: 'guava', version: '21.0'
+
+    // Postgres
+    compile group: 'postgresql', name: 'postgresql', version: '9.1-901-1.jdbc4'
 }
 
 task fatJar(type: Jar) {

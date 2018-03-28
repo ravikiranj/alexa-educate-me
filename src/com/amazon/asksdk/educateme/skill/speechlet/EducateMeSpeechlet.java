@@ -76,7 +76,7 @@ public class EducateMeSpeechlet implements SpeechletV2 {
         String userId = user.getUserId();
         String topic = intent.getSlot(QUERY).getValue();
         int readPointer = 0;
-        TopicMessage topicMessage = null;
+        String topicMessage;
 
         // Get Topic Number from DDB
         String topicId = DDBHelper.getTopicId(topic);
@@ -86,11 +86,14 @@ public class EducateMeSpeechlet implements SpeechletV2 {
             return getAskResponse(EDUCATE_ME, UNSUPPORTED_TEXT);
         } else {
             readPointer = SessionHelper.getReadPointer(userId, topicId);
-
+            log.info(" READ POINTER = " +readPointer);
             if (readPointer < 0) {
-                topicMessage = DDBHelper.getTopicData(topicId, 0);
+                topicMessage = DDBHelper.getTopicData(topic, 0);
+                SessionHelper.insertData(userId, topicId, 0);
+                log.info(" For readPointer = "+readPointer+ " recieved the following topicMessage ====== " +topicMessage);
+
             } else {
-                topicMessage = DDBHelper.getTopicData(topicId, readPointer + 1);
+                topicMessage = DDBHelper.getTopicData(topic, readPointer + 1);
 
                 if (topicMessage == null) {
                     // If we are done reading the topic - remove the topic from Postgres
@@ -98,12 +101,13 @@ public class EducateMeSpeechlet implements SpeechletV2 {
                     return getEducateIntentResponse("It was great educating you on "+ topic +". Let me know if I can educate you with anything else");
                 }
 
+                log.info(" For readPointer = "+readPointer+ " recieved the following topicMessage ======= " +topicMessage);
                 // If we have a topicMessage, update the value in SessionManagement to next readPointer
                 SessionHelper.updateReadPointer(userId, topicId, readPointer + 1);
             }
 
         }
-        return getEducateIntentResponse(topicMessage.getTextMessage());
+        return getEducateIntentResponse(topicMessage);
     }
 
     @Override
@@ -129,7 +133,7 @@ public class EducateMeSpeechlet implements SpeechletV2 {
      */
     private SpeechletResponse getEducateIntentResponse(String topic) {
         log.info("EducateIntent Topic = {}", topic);
-        String speechText = "EducateIntent, Topic = " + topic;
+        String speechText = topic;
 
         // Create the Simple card content.
         SimpleCard card = getSimpleCard(EDUCATE_ME, speechText);
