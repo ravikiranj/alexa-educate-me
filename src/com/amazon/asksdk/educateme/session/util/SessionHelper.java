@@ -89,7 +89,7 @@ public class SessionHelper {
         Connection connection = getConnection();
         if (connection != null) {
             String sql = "insert into educate_user_topic_state(user_id, topic_id, seq_id) values('" + userId + "', '"
-                + topicId + "'," + newReadPointer + ")";
+                + topicId + "'," + newReadPointer + ") ON CONFLICT(user_id, topic_id) DO UPDATE SET seq_id = " + newReadPointer;
             try {
                 Statement statement = connection.createStatement();
                 boolean status = statement.execute(sql);
