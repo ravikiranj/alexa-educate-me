@@ -1,6 +1,6 @@
 package com.amazon.asksdk.educateme.session.model;
 
-import com.amazon.asksdk.restapi.ddb.model.Topic;
+import com.amazon.asksdk.educateme.ddb.model.Topic;
 import com.amazon.speech.speechlet.User;
 
 public class UserInfo {

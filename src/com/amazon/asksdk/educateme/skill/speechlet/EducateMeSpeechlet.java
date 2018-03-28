@@ -81,7 +81,7 @@ public class EducateMeSpeechlet implements SpeechletV2 {
         // Get Topic Number from DDB
         int topicId = DDBHelper.getTopicId(topic);
 
-        // Get Pointer Info from DDB
+        // Get Pointer Info from SessionManagement
         if (topicId < 0) {
             return getAskResponse(EDUCATE_ME, UNSUPPORTED_TEXT);
         } else {
@@ -95,7 +95,7 @@ public class EducateMeSpeechlet implements SpeechletV2 {
                 if (topicMessage == null) {
                     // If we are done reading the topic - remove the topic from Postgres
                     SessionHelper.removeTopic(userId, topicId);
-                    return getEducateIntentResponse("It was great educating you on this. Let me know if I can educate you with anything else");
+                    return getEducateIntentResponse("It was great educating you on "+ topic +". Let me know if I can educate you with anything else");
                 }
 
                 // If we have a topicMessage, update the value in SessionManagement to next readPointer
